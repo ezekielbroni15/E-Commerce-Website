@@ -574,8 +574,72 @@ function Cart() {
       <div className="cart-actions"><Link to="/">Return To Shop</Link><button type="button">Update Cart</button></div>
       <div className="cart-bottom">
         <div className="coupon"><input placeholder="Coupon Code" /><button type="button">Apply Coupon</button></div>
-        <div className="cart-total"><h2>Cart Total</h2><p><span>Subtotal:</span>{money(subtotal)}</p><p><span>Shipping:</span>Free</p><p><span>Total:</span>{money(subtotal)}</p><button type="button">Process to checkout</button></div>
+        <div className="cart-total"><h2>Cart Total</h2><p><span>Subtotal:</span>{money(subtotal)}</p><p><span>Shipping:</span>Free</p><p><span>Total:</span>{money(subtotal)}</p><Link to="/checkout">Proceed to checkout</Link></div>
       </div>
+    </main>
+  )
+}
+
+function Checkout() {
+  const cartItems = [
+    { id: 'monitor', name: 'LCD Monitor', price: 650, quantity: 1, image: '/assets/lcd-monitor.svg' },
+    { id: 'gamepad', name: 'HI Gamepad', price: 550, quantity: 2, image: '/assets/gamepad.png' },
+  ]
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const billingFields = [
+    ['firstName', 'First Name*'],
+    ['companyName', 'Company Name'],
+    ['streetAddress', 'Street Address*'],
+    ['apartment', 'Apartment, floor, etc. (optional)'],
+    ['city', 'Town/City*'],
+    ['phone', 'Phone Number*'],
+    ['email', 'Email Address*'],
+  ]
+
+  return (
+    <main className="page-shell checkout-page">
+      <p className="breadcrumb">Account / My Account / Product / View Cart / <strong>CheckOut</strong></p>
+      <section className="checkout-layout">
+        <form className="billing-form">
+          <h1>Billing Details</h1>
+          {billingFields.map(([name, label]) => (
+            <label key={name}>
+              <span>{label}</span>
+              <input name={name} />
+            </label>
+          ))}
+          <label className="save-info">
+            <input type="checkbox" defaultChecked />
+            <span>Save this information for faster check-out next time</span>
+          </label>
+        </form>
+
+        <aside className="checkout-summary">
+          {cartItems.map((item) => (
+            <div className="checkout-product" key={item.id}>
+              <span><img src={item.image} alt="" />{item.name}</span>
+              <strong>{money(item.price * item.quantity)}</strong>
+            </div>
+          ))}
+          <p><span>Subtotal:</span><strong>{money(subtotal)}</strong></p>
+          <p><span>Shipping:</span><strong>Free</strong></p>
+          <p><span>Total:</span><strong>{money(subtotal)}</strong></p>
+          <label className="payment-row">
+            <input type="radio" name="payment" />
+            <span>Bank</span>
+            <span className="card-icons"><b>Bkash</b><b>VISA</b><b>MC</b><b>Pay</b></span>
+          </label>
+          <label className="payment-row">
+            <input type="radio" name="payment" defaultChecked />
+            <span>Cash on delivery</span>
+          </label>
+          <div className="checkout-coupon">
+            <input placeholder="Coupon Code" />
+            <button type="button">Apply Coupon</button>
+          </div>
+          <button className="place-order" type="button">Place Order</button>
+        </aside>
+      </section>
     </main>
   )
 }
@@ -610,6 +674,7 @@ function Placeholder({ title }) {
 
 const ProtectedWishlist = withAuth(Wishlist)
 const ProtectedCart = withAuth(Cart)
+const ProtectedCheckout = withAuth(Checkout)
 const ProtectedAccount = withAuth(AccountPage)
 
 export default function App() {
@@ -623,6 +688,7 @@ export default function App() {
         <Route path="/wishlist" element={<ProtectedWishlist />} />
         <Route path="/products/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<ProtectedCart />} />
+        <Route path="/checkout" element={<ProtectedCheckout />} />
         <Route path="/account" element={<ProtectedAccount />} />
         <Route path="/contact" element={<Placeholder title="Contact" />} />
         <Route path="/about" element={<Placeholder title="About" />} />
