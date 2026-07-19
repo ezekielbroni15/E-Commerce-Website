@@ -627,7 +627,7 @@ function Checkout() {
           <label className="payment-row">
             <input type="radio" name="payment" />
             <span>Bank</span>
-            <span className="card-icons"><b>Bkash</b><b>VISA</b><b>MC</b><b>Pay</b></span>
+            <img className="payment-methods" src="/assets/payment-methods.svg" alt="Accepted payment methods" />
           </label>
           <label className="payment-row">
             <input type="radio" name="payment" defaultChecked />
@@ -648,10 +648,40 @@ function AccountPage() {
   const { user } = useAuth()
   return (
     <main className="page-shell inner-page account-page">
-      <p>Welcome! <strong>{user?.displayName || 'Md Rimel'}</strong></p>
+      <div className="account-top">
+        <p className="breadcrumb">Home / <strong>My Account</strong></p>
+        <p>Welcome! <strong>{user?.displayName || 'Md Rimel'}</strong></p>
+      </div>
       <div className="account-grid">
-        <aside><h3>Manage My Account</h3><a>My Profile</a><a>Address Book</a><a>My Payment Options</a><h3>My Orders</h3><a>My Returns</a><a>My Cancellations</a></aside>
-        <form><h2>Edit Your Profile</h2><Field name="name" placeholder="Md Rimel" form={{ values: {}, errors: {}, handleChange: () => {} }} /><Field name="email" placeholder="rimel1111@gmail.com" form={{ values: {}, errors: {}, handleChange: () => {} }} /><button className="primary-btn" type="button">Save Changes</button></form>
+        <aside className="account-sidebar">
+          <h3>Manage My Account</h3>
+          <a className="active">My Profile</a>
+          <a>Address Book</a>
+          <a>My Payment Options</a>
+          <h3>My Orders</h3>
+          <a>My Returns</a>
+          <a>My Cancellations</a>
+          <h3>My WishList</h3>
+        </aside>
+        <form className="profile-form">
+          <h2>Edit Your Profile</h2>
+          <div className="profile-two">
+            <label><span>First Name</span><input placeholder="Md" /></label>
+            <label><span>Last Name</span><input placeholder="Rimel" /></label>
+            <label><span>Email</span><input placeholder="rimel1111@gmail.com" /></label>
+            <label><span>Address</span><input placeholder="Kingston, 5236, United State" /></label>
+          </div>
+          <label className="password-stack">
+            <span>Password Changes</span>
+            <input placeholder="Current Password" type="password" />
+            <input placeholder="New Password" type="password" />
+            <input placeholder="Confirm New Password" type="password" />
+          </label>
+          <div className="profile-actions">
+            <button type="button">Cancel</button>
+            <button className="primary-btn" type="button">Save Changes</button>
+          </div>
+        </form>
       </div>
     </main>
   )
@@ -669,7 +699,7 @@ function NotFound() {
 }
 
 function Placeholder({ title }) {
-  return <main className="page-shell not-found"><h1>{title}</h1><p>This screen is outside the Stage 6 build list.</p><Link className="primary-btn" to="/">Back home</Link></main>
+  return <main className="page-shell not-found"><h1>{title}</h1><Link className="primary-btn" to="/">Back home</Link></main>
 }
 
 const ProtectedWishlist = withAuth(Wishlist)

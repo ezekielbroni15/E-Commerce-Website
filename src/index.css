@@ -1516,20 +1516,10 @@ footer a {
   margin-right: auto;
 }
 
-.card-icons {
-  display: flex;
-  gap: 8px;
-}
-
-.card-icons b {
-  min-width: 40px;
+.payment-methods {
+  width: 192px;
   height: 28px;
-  display: inline-grid;
-  place-items: center;
-  border-radius: 4px;
-  background: var(--soft);
-  font-size: 10px;
-  font-weight: 700;
+  object-fit: contain;
 }
 
 .checkout-coupon {
@@ -1557,11 +1547,25 @@ footer a {
   margin-top: 32px;
 }
 
-.account-page > p {
-  text-align: right;
+.account-page {
+  padding-top: 80px;
 }
 
-.account-page strong {
+.account-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 78px;
+}
+
+.account-top .breadcrumb,
+.account-top p {
+  margin: 0;
+}
+
+.account-top strong,
+.profile-form h2,
+.account-sidebar .active {
   color: var(--accent);
 }
 
@@ -1569,30 +1573,93 @@ footer a {
   display: grid;
   grid-template-columns: 270px 1fr;
   gap: 80px;
+  align-items: start;
 }
 
-.account-grid aside {
+.account-sidebar {
   display: grid;
   align-content: start;
-  gap: 10px;
+  gap: 8px;
 }
 
-.account-grid aside h3 {
-  margin: 14px 0 4px;
+.account-sidebar h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 500;
 }
 
-.account-grid aside a {
+.account-sidebar h3:not(:first-child) {
+  margin-top: 16px;
+}
+
+.account-sidebar a {
+  display: block;
+  padding-left: 35px;
   color: var(--muted);
+  line-height: 1.5;
 }
 
-.account-grid form {
+.profile-form {
   padding: 40px 80px;
   box-shadow: 0 1px 13px rgba(0, 0, 0, .08);
 }
 
-.account-grid form h2 {
-  color: var(--accent);
+.profile-form h2 {
+  margin: 0 0 16px;
   font-size: 20px;
+  font-weight: 500;
+}
+
+.profile-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 50px;
+  row-gap: 24px;
+}
+
+.profile-form label span {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.profile-form input {
+  width: 100%;
+  height: 50px;
+  border: 0;
+  outline: 0;
+  border-radius: 4px;
+  background: var(--soft);
+  padding: 0 16px;
+}
+
+.profile-form input::placeholder {
+  color: rgba(0, 0, 0, .5);
+}
+
+.password-stack {
+  display: block;
+  margin-top: 24px;
+}
+
+.password-stack input {
+  margin-bottom: 16px;
+}
+
+.profile-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 32px;
+}
+
+.profile-actions button:first-child {
+  border: 0;
+  background: transparent;
+}
+
+.profile-actions .primary-btn {
+  width: 214px;
+  height: 56px;
 }
 
 .not-found {
@@ -1779,6 +1846,10 @@ footer a {
 
   .account-grid form {
     padding: 30px 20px;
+  }
+
+  .profile-two {
+    grid-template-columns: 1fr;
   }
 
   .checkout-summary {
