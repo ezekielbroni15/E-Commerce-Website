@@ -10,6 +10,7 @@ import {
   Headphones,
   Heart,
   LogOut,
+  Menu,
   Minus,
   Monitor,
   PackageCheck,
@@ -72,10 +73,12 @@ function imageClass(product) {
 }
 
 function Header() {
+  const [menuOpen, setMenuOpen] = useState(false)
   const cartCount = useSelector((state) =>
     Object.values(state.cart.items).reduce((total, quantity) => total + quantity, 0),
   )
   const wishlistCount = useSelector((state) => state.cart.wishlist.length)
+  const closeMenu = () => setMenuOpen(false)
 
   return (
     <header>
@@ -85,23 +88,26 @@ function Header() {
         <span className="language">English <ChevronDown size={14} /></span>
       </div>
       <div className="nav-wrap">
-        <Link className="brand" to="/">Exclusive</Link>
-        <nav>
-          <NavLink to="/">Home</NavLink>
-          <NavLink to="/contact">Contact</NavLink>
-          <NavLink to="/about">About</NavLink>
-          <NavLink to="/signup">Sign Up</NavLink>
+        <Link className="brand" to="/" onClick={closeMenu}>Exclusive</Link>
+        <button className="menu-button" type="button" onClick={() => setMenuOpen((open) => !open)} aria-label="Toggle navigation" aria-expanded={menuOpen}>
+          {menuOpen ? <X size={26} /> : <Menu size={26} />}
+        </button>
+        <nav className={menuOpen ? 'open' : ''}>
+          <NavLink to="/" onClick={closeMenu}>Home</NavLink>
+          <NavLink to="/contact" onClick={closeMenu}>Contact</NavLink>
+          <NavLink to="/about" onClick={closeMenu}>About</NavLink>
+          <NavLink to="/signup" onClick={closeMenu}>Sign Up</NavLink>
         </nav>
-        <div className="nav-actions">
+        <div className={`nav-actions ${menuOpen ? 'open' : ''}`}>
           <label className="search">
             <input placeholder="What are you looking for?" />
             <Search size={20} />
           </label>
-          <Link className="icon-link wishlist-badge" to="/wishlist" aria-label="Wishlist">
+          <Link className="icon-link wishlist-badge" to="/wishlist" onClick={closeMenu} aria-label="Wishlist">
             <Heart size={23} />
             {wishlistCount > 0 && <span>{wishlistCount}</span>}
           </Link>
-          <Link className="icon-link cart-badge" to="/cart" aria-label="Cart">
+          <Link className="icon-link cart-badge" to="/cart" onClick={closeMenu} aria-label="Cart">
             <ShoppingCart size={24} />
             {cartCount > 0 && <span>{cartCount}</span>}
           </Link>
