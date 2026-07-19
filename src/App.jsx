@@ -428,21 +428,27 @@ function AuthScreen({ mode }) {
   return (
     <main className="auth-page">
       <img src="/assets/auth.jpg" alt="Shopping cart and phone" />
-      <form className="auth-form" onSubmit={form.handleSubmit}>
+      <form className={`auth-form ${isSignup ? 'signup-form' : 'login-form'}`} onSubmit={form.handleSubmit}>
         <h1>{isSignup ? 'Create an account' : 'Log in to Exclusive'}</h1>
         <p>Enter your details below</p>
         {isSignup && <Field name="name" placeholder="Name" form={form} />}
         <Field name="email" placeholder="Email or Phone Number" form={form} />
         <Field name="password" placeholder="Password" type="password" form={form} />
         {error && <small className="field-error">{error}</small>}
-        <button className="primary-btn auth-submit" type="submit" disabled={loading}>{isSignup ? 'Create Account' : 'Log In'}</button>
         {isSignup ? (
           <>
-            <button className="google-btn" type="button">Sign up with Google</button>
+            <button className="primary-btn auth-submit" type="submit" disabled={loading}>Create Account</button>
+            <button className="google-btn" type="button">
+              <img src="/assets/google.svg" alt="" />
+              Sign up with Google
+            </button>
             <span>Already have account? <Link to="/login">Log in</Link></span>
           </>
         ) : (
-          <Link className="forgot" to="/signup">Forget Password?</Link>
+          <div className="login-actions">
+            <button className="primary-btn auth-login-btn" type="submit" disabled={loading}>Log In</button>
+            <Link className="forgot" to="/signup">Forget Password?</Link>
+          </div>
         )}
       </form>
     </main>

@@ -895,9 +895,9 @@ footer a {
 
 .auth-page {
   display: grid;
-  grid-template-columns: minmax(280px, .92fr) minmax(320px, 1fr);
-  align-items: center;
-  gap: 90px;
+  grid-template-columns: minmax(520px, 805px) 371px;
+  align-items: start;
+  gap: 129px;
   width: min(1305px, calc(100% - 32px));
   margin: 60px auto 140px 0;
 }
@@ -909,7 +909,16 @@ footer a {
 }
 
 .auth-form {
-  width: min(370px, 100%);
+  width: 371px;
+  max-width: 100%;
+}
+
+.signup-form {
+  margin-top: 25px;
+}
+
+.login-form {
+  margin-top: 125px;
 }
 
 .auth-form h1 {
@@ -920,12 +929,12 @@ footer a {
 }
 
 .auth-form p {
-  margin: 0 0 32px;
+  margin: 0 0 34px;
 }
 
 .field {
   display: block;
-  margin-bottom: 22px;
+  margin-bottom: 26px;
 }
 
 .field input {
@@ -943,15 +952,26 @@ footer a {
 
 .auth-submit {
   width: 100%;
+  height: 56px;
+  margin-top: 14px;
 }
 
 .google-btn {
   width: 100%;
-  min-height: 48px;
+  min-height: 56px;
   margin-top: 16px;
   border: 1px solid #aaa;
   border-radius: 4px;
   background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.google-btn img {
+  width: 24px;
+  height: 24px;
 }
 
 .auth-form span {
@@ -967,8 +987,24 @@ footer a {
 }
 
 .forgot {
-  display: inline-block;
-  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+}
+
+.login-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  margin-top: 14px;
+}
+
+.auth-login-btn {
+  width: 143px;
+  height: 56px;
+  padding: 0 40px;
+  flex: 0 0 auto;
 }
 
 .inner-page {
