@@ -28,14 +28,14 @@ import {
   X,
 } from 'lucide-react'
 import { useState } from 'react'
-import { Link, NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom'
+import { Link, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import Toggle from './components/Toggle'
-import { products, wishlistProducts } from './data/products'
+import { products } from './data/products'
 import { withAuth } from './hocs/withAuth'
-import { useAuth } from './hooks/useAuth.jsx'
+import { useAuth } from './hooks/useAuth'
 import { useForm } from './hooks/useForm'
-import { addToCart, removeFromCart, updateQuantity } from './store/cartSlice'
+import { addToCart, removeFromCart, removeFromWishlist, toggleWishlist, updateQuantity } from './store/cartSlice'
 
 const categories = [
   "Woman's Fashion",
@@ -58,6 +58,11 @@ const categoryIcons = [
   [Gamepad2, 'Gaming'],
 ]
 
+const cartDisplay = {
+  monitor: { name: 'LCD Monitor', price: 650, image: '/assets/lcd-monitor-real.png' },
+  gamepad: { name: 'HI Gamepad', price: 550 },
+}
+
 function money(value) {
   return `$${value}`
 }
@@ -70,7 +75,7 @@ function Header() {
   const cartCount = useSelector((state) =>
     Object.values(state.cart.items).reduce((total, quantity) => total + quantity, 0),
   )
-  const wishlistCount = wishlistProducts.length
+  const wishlistCount = useSelector((state) => state.cart.wishlist.length)
 
   return (
     <header>
@@ -241,13 +246,25 @@ function Rating({ value, reviews }) {
 
 function ProductCard({ product, removable = false, viewOnly = false }) {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const currentLocation = useLocation()
+  const { user } = useAuth()
+  const isWishlisted = useSelector((state) => state.cart.wishlist.includes(product.id))
+  const handleAddToCart = () => {
+    if (!user) {
+      navigate('/login', { state: { from: currentLocation.pathname } })
+      return
+    }
+    dispatch(addToCart(product.id))
+  }
+
   return (
     <article className="product-card">
       <div className="product-media">
         {product.discount && <span className="discount">{product.discount}</span>}
         {product.badge && <span className="new-badge">{product.badge}</span>}
         {removable ? (
-          <button className="remove-button" type="button" aria-label="Remove wishlist item">
+          <button className="remove-button" type="button" onClick={() => dispatch(removeFromWishlist(product.id))} aria-label="Remove wishlist item">
             <Trash2 size={18} />
           </button>
         ) : viewOnly ? (
@@ -257,8 +274,17 @@ function ProductCard({ product, removable = false, viewOnly = false }) {
         ) : (
           <>
             <Toggle
+              initial={isWishlisted}
               render={(liked, toggle) => (
-                <button className="heart-button" type="button" onClick={toggle} aria-label="Toggle wishlist">
+                <button
+                  className="heart-button"
+                  type="button"
+                  onClick={() => {
+                    toggle()
+                    dispatch(toggleWishlist(product.id))
+                  }}
+                  aria-label="Toggle wishlist"
+                >
                   <Heart size={18} fill={liked ? '#db4444' : 'none'} color={liked ? '#db4444' : '#111'} />
                 </button>
               )}
@@ -271,7 +297,7 @@ function ProductCard({ product, removable = false, viewOnly = false }) {
         <Link to={`/products/${product.id}`}>
           <img className={imageClass(product)} src={product.image} alt={product.name} />
         </Link>
-        <button type="button" onClick={() => dispatch(addToCart(product.id))}>Add To Cart</button>
+        <button type="button" onClick={handleAddToCart}>Add To Cart</button>
       </div>
       <h3>{product.name}</h3>
       <div className="prices">
@@ -437,6 +463,7 @@ function Services() {
 
 function AuthScreen({ mode }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { signUp, logIn, loading, error } = useAuth()
   const isSignup = mode === 'signup'
   const form = useForm({
@@ -448,7 +475,7 @@ function AuthScreen({ mode }) {
         navigate('/login')
       } else {
         await logIn(values)
-        navigate('/')
+        navigate(location.state?.from || '/')
       }
     },
   })
@@ -493,7 +520,8 @@ function Field({ name, placeholder, type = 'text', form }) {
 }
 
 function Wishlist() {
-  const wishlist = products.filter((product) => wishlistProducts.includes(product.id))
+  const wishlistIds = useSelector((state) => state.cart.wishlist)
+  const wishlist = products.filter((product) => wishlistIds.includes(product.id))
   return (
     <main className="page-shell inner-page wishlist-page">
       <div className="plain-heading wishlist-heading">
@@ -517,6 +545,8 @@ function Wishlist() {
 function ProductDetails() {
   const { id } = useParams()
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const product = products.find((item) => item.id === id) || products[0]
   const detailProduct = product.id === 'gamepad'
     ? {
@@ -545,7 +575,18 @@ function ProductDetails() {
           <div className="option-row sizes"><span>Size:</span>{['XS', 'S', 'M', 'L', 'XL'].map((size) => <button className={size === 'M' ? 'active' : ''} key={size}>{size}</button>)}</div>
           <div className="buy-row">
             <div className="qty-stepper"><button type="button"><Minus size={16} /></button><span>2</span><button type="button"><Plus size={16} /></button></div>
-            <button type="button" onClick={() => dispatch(addToCart(product.id))}>Buy Now</button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!user) {
+                  navigate('/login', { state: { from: `/products/${product.id}` } })
+                  return
+                }
+                dispatch(addToCart(product.id))
+              }}
+            >
+              Buy Now
+            </button>
             <Toggle render={(liked, toggle) => <button className="outline-icon" type="button" onClick={toggle}><Heart fill={liked ? '#db4444' : 'none'} color={liked ? '#db4444' : '#111'} /></button>} />
           </div>
           <div className="delivery-box"><Truck size={24} /><div><strong>Free Delivery</strong><p>Enter your postal code for Delivery Availability</p></div></div>
@@ -567,10 +608,6 @@ function ProductDetails() {
 function Cart() {
   const dispatch = useDispatch()
   const items = useSelector((state) => state.cart.items)
-  const cartDisplay = {
-    monitor: { name: 'LCD Monitor', price: 650, image: '/assets/lcd-monitor.svg' },
-    gamepad: { name: 'HI Gamepad', price: 550 },
-  }
   const cartRows = Object.entries(items).map(([id, quantity]) => ({
     product: products.find((item) => item.id === id),
     display: cartDisplay[id],
@@ -617,10 +654,18 @@ function Cart() {
 }
 
 function Checkout() {
-  const cartItems = [
-    { id: 'monitor', name: 'LCD Monitor', price: 650, quantity: 1, image: '/assets/lcd-monitor.svg' },
-    { id: 'gamepad', name: 'HI Gamepad', price: 550, quantity: 2, image: '/assets/gamepad.png' },
-  ]
+  const items = useSelector((state) => state.cart.items)
+  const cartItems = Object.entries(items).map(([id, quantity]) => {
+    const product = products.find((item) => item.id === id)
+    const display = cartDisplay[id]
+    return product && {
+      id,
+      name: display?.name || product.name,
+      price: display?.price || product.price,
+      quantity,
+      image: display?.image || product.image,
+    }
+  }).filter(Boolean)
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const billingFields = [
     ['firstName', 'First Name*'],
@@ -631,17 +676,31 @@ function Checkout() {
     ['phone', 'Phone Number*'],
     ['email', 'Email Address*'],
   ]
+  const checkoutForm = useForm({
+    initialValues: {
+      apartment: '',
+      city: '',
+      companyName: '',
+      email: '',
+      firstName: '',
+      phone: '',
+      streetAddress: '',
+    },
+    fields: ['firstName', 'streetAddress', 'city', 'phone', 'email'],
+    onSubmit: async () => {},
+  })
 
   return (
     <main className="page-shell checkout-page">
       <p className="breadcrumb">Account / My Account / Product / View Cart / <strong>CheckOut</strong></p>
       <section className="checkout-layout">
-        <form className="billing-form">
+        <form className="billing-form" id="checkout-form" onSubmit={checkoutForm.handleSubmit}>
           <h1>Billing Details</h1>
           {billingFields.map(([name, label]) => (
             <label key={name}>
               <span>{label}</span>
-              <input name={name} />
+              <input name={name} value={checkoutForm.values[name] || ''} onChange={checkoutForm.handleChange} />
+              {checkoutForm.errors[name] && <small className="field-error">{checkoutForm.errors[name]}</small>}
             </label>
           ))}
           <label className="save-info">
@@ -673,7 +732,7 @@ function Checkout() {
             <input placeholder="Coupon Code" />
             <button type="button">Apply Coupon</button>
           </div>
-          <button className="place-order" type="button">Place Order</button>
+          <button className="place-order" type="submit" form="checkout-form">Place Order</button>
         </aside>
       </section>
     </main>

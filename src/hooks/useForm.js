@@ -1,6 +1,10 @@
 import { useState } from 'react'
 
 const validators = {
+  required(value) {
+    if (!value.trim()) return 'This field is required'
+    return ''
+  },
   name(value) {
     if (!value.trim()) return 'Name is required'
     if (value.trim().length < 2) return 'Name must be at least 2 characters'
@@ -21,6 +25,15 @@ const validators = {
     if (!value.trim()) return 'Phone number is required'
     if (value.replace(/\D/g, '').length < 10) return 'Enter a valid phone number'
     return ''
+  },
+  firstName(value) {
+    return validators.required(value)
+  },
+  streetAddress(value) {
+    return validators.required(value)
+  },
+  city(value) {
+    return validators.required(value)
   },
 }
 
@@ -49,7 +62,12 @@ export function useForm({ initialValues, fields, onSubmit }) {
   const handleSubmit = async (event) => {
     event.preventDefault()
     setSubmitted(true)
-    if (validate()) await onSubmit(values)
+    if (!validate()) return
+    try {
+      await onSubmit(values)
+    } catch {
+      // Auth/API errors are exposed by the caller hook, such as useAuth.error.
+    }
   }
 
   return { values, errors, submitted, handleChange, handleSubmit, validate }

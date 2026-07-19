@@ -5,6 +5,7 @@ const initialState = {
     monitor: 1,
     gamepad: 2,
   },
+  wishlist: ['duffle', 'speaker', 'gamepad', 'jacket'],
 }
 
 const cartSlice = createSlice({
@@ -26,8 +27,28 @@ const cartSlice = createSlice({
     removeFromCart(state, action) {
       delete state.items[action.payload]
     },
+    addToWishlist(state, action) {
+      if (!state.wishlist.includes(action.payload)) state.wishlist.push(action.payload)
+    },
+    removeFromWishlist(state, action) {
+      state.wishlist = state.wishlist.filter((id) => id !== action.payload)
+    },
+    toggleWishlist(state, action) {
+      if (state.wishlist.includes(action.payload)) {
+        state.wishlist = state.wishlist.filter((id) => id !== action.payload)
+      } else {
+        state.wishlist.push(action.payload)
+      }
+    },
   },
 })
 
-export const { addToCart, updateQuantity, removeFromCart } = cartSlice.actions
+export const {
+  addToCart,
+  addToWishlist,
+  removeFromCart,
+  removeFromWishlist,
+  toggleWishlist,
+  updateQuantity,
+} = cartSlice.actions
 export default cartSlice.reducer

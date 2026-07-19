@@ -1,16 +1,47 @@
-# React + Vite
+# Exclusive E-Commerce
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React + Vite implementation of the KodeCamp 6.0 Stage 6 e-commerce task.
 
-Currently, two official plugins are available:
+## Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+cp .env.example .env
+npm run dev
+```
 
-## React Compiler
+Fill `.env` with your Firebase web app config:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+```
 
-## Expanding the Oxlint configuration
+Firebase Email/Password authentication must be enabled in the Firebase console.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Implemented Requirements
+
+- React Router routes for Home, Sign Up, Log In, Wishlist, Product Details, Cart, Checkout, Account, About, Contact, and 404.
+- Firebase Auth sign up, login, logout, and auth state tracking.
+- Sign up redirects to Log In after successful Firebase account creation.
+- Redux Toolkit manages cart and wishlist state globally.
+- Protected Cart, Wishlist, Checkout, Account page, and Account Dropdown through `withAuth`.
+- Shared `useForm` validation for Sign Up, Log In, and Checkout billing fields.
+- Shared `useAuth` hook contains the Firebase auth logic.
+- Render-prop `Toggle` powers account dropdown state and wishlist heart state.
+
+## Advanced Pattern Locations
+
+- Custom hooks: `src/hooks/useAuth.js`, `src/hooks/useForm.js`
+- Higher-Order Component: `src/hocs/withAuth.jsx`
+- Render prop component: `src/components/Toggle.jsx`
+
+## Build
+
+```bash
+npm run build
+```
