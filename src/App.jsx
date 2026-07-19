@@ -5,12 +5,15 @@ import {
   Camera,
   ChevronDown,
   CircleX,
+  Eye,
   Gamepad2,
   Headphones,
   Heart,
   LogOut,
+  Minus,
   Monitor,
   PackageCheck,
+  Plus,
   Search,
   ShieldCheck,
   ShoppingBag,
@@ -230,7 +233,7 @@ function Rating({ value, reviews }) {
   )
 }
 
-function ProductCard({ product, removable = false }) {
+function ProductCard({ product, removable = false, viewOnly = false }) {
   const dispatch = useDispatch()
   return (
     <article className="product-card">
@@ -241,14 +244,23 @@ function ProductCard({ product, removable = false }) {
           <button className="remove-button" type="button" aria-label="Remove wishlist item">
             <Trash2 size={18} />
           </button>
+        ) : viewOnly ? (
+          <Link className="view-button top" to={`/products/${product.id}`} aria-label={`View ${product.name}`}>
+            <Eye size={19} />
+          </Link>
         ) : (
-          <Toggle
-            render={(liked, toggle) => (
-              <button className="heart-button" type="button" onClick={toggle} aria-label="Toggle wishlist">
-                <Heart size={18} fill={liked ? '#db4444' : 'none'} color={liked ? '#db4444' : '#111'} />
-              </button>
-            )}
-          />
+          <>
+            <Toggle
+              render={(liked, toggle) => (
+                <button className="heart-button" type="button" onClick={toggle} aria-label="Toggle wishlist">
+                  <Heart size={18} fill={liked ? '#db4444' : 'none'} color={liked ? '#db4444' : '#111'} />
+                </button>
+              )}
+            />
+            <Link className="view-button" to={`/products/${product.id}`} aria-label={`View ${product.name}`}>
+              <Eye size={19} />
+            </Link>
+          </>
         )}
         <Link to={`/products/${product.id}`}>
           <img src={product.image} alt={product.name} />
@@ -490,7 +502,7 @@ function Wishlist() {
         <button type="button" className="outline-btn">See All</button>
       </div>
       <div className="product-grid">
-        {products.slice(0, 4).map((product) => <ProductCard key={`just-${product.id}`} product={product} />)}
+        {products.slice(0, 4).map((product) => <ProductCard key={`just-${product.id}`} product={product} viewOnly />)}
       </div>
     </main>
   )
@@ -500,28 +512,46 @@ function ProductDetails() {
   const { id } = useParams()
   const dispatch = useDispatch()
   const product = products.find((item) => item.id === id) || products[0]
+  const detailProduct = product.id === 'gamepad'
+    ? {
+      ...product,
+      name: 'Havic HV G-92 Gamepad',
+      price: 192,
+      reviews: 150,
+      description: 'PlayStation 5 Controller Skin High quality vinyl with air channel adhesive for easy bubble free install & mess free removal Pressure sensitive.',
+    }
+    : product
   return (
     <main className="page-shell detail-page">
-      <p className="breadcrumb">Account / Gaming / <strong>{product.name}</strong></p>
+      <p className="breadcrumb">Account / Gaming / <strong>{detailProduct.name}</strong></p>
       <section className="detail-layout">
         <div className="thumbs">
-          {[1, 2, 3, 4].map((item) => <div key={item}><img src={product.image} alt="" /></div>)}
+          {[1, 2, 3, 4].map((item) => <div key={item}><img src={detailProduct.image} alt="" /></div>)}
         </div>
-        <div className="detail-image"><img src={product.image} alt={product.name} /></div>
+        <div className="detail-image"><img src={detailProduct.image} alt={detailProduct.name} /></div>
         <div className="detail-info">
-          <h1>{product.name}</h1>
-          <Rating value={product.rating} reviews={product.reviews} />
-          <p className="detail-price">{money(product.price)}</p>
-          <p>{product.description}</p>
+          <h1>{detailProduct.name}</h1>
+          <div className="detail-rating"><Rating value={detailProduct.rating} reviews={detailProduct.reviews} /><span>|</span><strong>In Stock</strong></div>
+          <p className="detail-price">{money(detailProduct.price)}.00</p>
+          <p className="detail-copy">{detailProduct.description}</p>
           <hr />
           <div className="option-row"><span>Colours:</span><button className="swatch red" /><button className="swatch black" /></div>
-          <div className="option-row sizes"><span>Size:</span>{['XS', 'S', 'M', 'L', 'XL'].map((size) => <button key={size}>{size}</button>)}</div>
+          <div className="option-row sizes"><span>Size:</span>{['XS', 'S', 'M', 'L', 'XL'].map((size) => <button className={size === 'M' ? 'active' : ''} key={size}>{size}</button>)}</div>
           <div className="buy-row">
+            <div className="qty-stepper"><button type="button"><Minus size={16} /></button><span>2</span><button type="button"><Plus size={16} /></button></div>
             <button type="button" onClick={() => dispatch(addToCart(product.id))}>Buy Now</button>
             <Toggle render={(liked, toggle) => <button className="outline-icon" type="button" onClick={toggle}><Heart fill={liked ? '#db4444' : 'none'} color={liked ? '#db4444' : '#111'} /></button>} />
           </div>
           <div className="delivery-box"><Truck size={24} /><div><strong>Free Delivery</strong><p>Enter your postal code for Delivery Availability</p></div></div>
           <div className="delivery-box"><PackageCheck size={24} /><div><strong>Return Delivery</strong><p>Free 30 Days Delivery Returns. Details</p></div></div>
+        </div>
+      </section>
+      <section className="related-products">
+        <div className="wishlist-subheading">
+          <h2><span />Related Item</h2>
+        </div>
+        <div className="product-grid">
+          {products.slice(0, 4).map((item) => <ProductCard key={`related-${item.id}`} product={item} />)}
         </div>
       </section>
     </main>

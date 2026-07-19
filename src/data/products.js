@@ -33,7 +33,7 @@ export const products = [
     rating: 5,
     reviews: 99,
     discount: '-30%',
-    image: '/assets/ps5.jpg',
+    image: '/assets/lcd-monitor-real.png',
     category: 'Electronics',
     description:
       'Immersive display tuned for fast refresh gaming, crisp color, and everyday desk productivity.',
