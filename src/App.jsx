@@ -4,7 +4,7 @@ import {
   ArrowUp,
   Camera,
   ChevronDown,
-  CircleUserRound,
+  CircleX,
   Gamepad2,
   Headphones,
   Heart,
@@ -13,6 +13,7 @@ import {
   PackageCheck,
   Search,
   ShieldCheck,
+  ShoppingBag,
   ShoppingCart,
   Smartphone,
   Star,
@@ -20,6 +21,7 @@ import {
   Truck,
   UserRound,
   Watch,
+  X,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Link, NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom'
@@ -60,6 +62,7 @@ function Header() {
   const cartCount = useSelector((state) =>
     Object.values(state.cart.items).reduce((total, quantity) => total + quantity, 0),
   )
+  const wishlistCount = wishlistProducts.length
 
   return (
     <header>
@@ -81,8 +84,9 @@ function Header() {
             <input placeholder="What are you looking for?" />
             <Search size={20} />
           </label>
-          <Link className="icon-link" to="/wishlist" aria-label="Wishlist">
+          <Link className="icon-link wishlist-badge" to="/wishlist" aria-label="Wishlist">
             <Heart size={23} />
+            {wishlistCount > 0 && <span>{wishlistCount}</span>}
           </Link>
           <Link className="icon-link cart-badge" to="/cart" aria-label="Cart">
             <ShoppingCart size={24} />
@@ -100,8 +104,9 @@ function AccountMenu() {
   return (
     <div className="account-menu">
       <Link to="/account"><UserRound size={18} />Manage My Account</Link>
-      <Link to="/cart"><PackageCheck size={18} />My Order</Link>
-      <Link to="/wishlist"><ShieldCheck size={18} />My Reviews</Link>
+      <Link to="/cart"><ShoppingBag size={18} />My Order</Link>
+      <Link to="/account"><CircleX size={18} />My Cancellations</Link>
+      <Link to="/wishlist"><Star size={18} />My Reviews</Link>
       <button type="button" onClick={logOut}><LogOut size={18} />Logout</button>
     </div>
   )
@@ -114,8 +119,8 @@ function AccountDropdown() {
     <Toggle
       render={(open, toggle) => (
         <div className="account-dropdown">
-          <button className="account-button" type="button" onClick={toggle} aria-label="Account">
-            <CircleUserRound size={25} />
+          <button className={`account-button ${open ? 'active' : ''}`} type="button" onClick={toggle} aria-label="Account">
+            <UserRound size={20} />
           </button>
           {open && <ProtectedAccountMenu />}
         </div>
@@ -167,7 +172,11 @@ function Footer() {
           </div>
         </div>
         <div className="social-links" aria-label="Social links">
-          <a aria-label="Facebook"><span className="brand-icon facebook-mark">f</span></a>
+          <a aria-label="Facebook">
+            <svg className="brand-icon facebook-mark" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14.3 8.1V6.4c0-.8.2-1.3 1.4-1.3h1.7V2.2C16.6 2.1 15.7 2 14.6 2c-2.5 0-4.2 1.5-4.2 4.2v1.9H7.6v3.2h2.8V22h3.4V11.3h2.8l.4-3.2h-3.1Z" />
+            </svg>
+          </a>
           <a aria-label="Twitter"><span className="brand-icon twitter-mark">x</span></a>
           <a aria-label="Instagram">
             <svg className="brand-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -228,17 +237,18 @@ function ProductCard({ product, removable = false }) {
       <div className="product-media">
         {product.discount && <span className="discount">{product.discount}</span>}
         {product.badge && <span className="new-badge">{product.badge}</span>}
-        <Toggle
-          render={(liked, toggle) => (
-            <button className="heart-button" type="button" onClick={toggle} aria-label="Toggle wishlist">
-              <Heart size={18} fill={liked ? '#db4444' : 'none'} color={liked ? '#db4444' : '#111'} />
-            </button>
-          )}
-        />
-        {removable && (
+        {removable ? (
           <button className="remove-button" type="button" aria-label="Remove wishlist item">
             <Trash2 size={18} />
           </button>
+        ) : (
+          <Toggle
+            render={(liked, toggle) => (
+              <button className="heart-button" type="button" onClick={toggle} aria-label="Toggle wishlist">
+                <Heart size={18} fill={liked ? '#db4444' : 'none'} color={liked ? '#db4444' : '#111'} />
+              </button>
+            )}
+          />
         )}
         <Link to={`/products/${product.id}`}>
           <img src={product.image} alt={product.name} />
@@ -467,15 +477,18 @@ function Field({ name, placeholder, type = 'text', form }) {
 function Wishlist() {
   const wishlist = products.filter((product) => wishlistProducts.includes(product.id))
   return (
-    <main className="page-shell inner-page">
-      <div className="plain-heading">
+    <main className="page-shell inner-page wishlist-page">
+      <div className="plain-heading wishlist-heading">
         <h1>Wishlist ({wishlist.length})</h1>
         <button type="button">Move All To Bag</button>
       </div>
       <div className="product-grid">
         {wishlist.map((product) => <ProductCard key={product.id} product={product} removable />)}
       </div>
-      <SectionTitle eyebrow="Just For You" title="" action={<button type="button" className="outline-btn">See All</button>} />
+      <div className="wishlist-subheading">
+        <h2><span />Just For You</h2>
+        <button type="button" className="outline-btn">See All</button>
+      </div>
       <div className="product-grid">
         {products.slice(0, 4).map((product) => <ProductCard key={`just-${product.id}`} product={product} />)}
       </div>
@@ -518,30 +531,50 @@ function ProductDetails() {
 function Cart() {
   const dispatch = useDispatch()
   const items = useSelector((state) => state.cart.items)
+  const cartDisplay = {
+    monitor: { name: 'LCD Monitor', price: 650, image: '/assets/lcd-monitor.svg' },
+    gamepad: { name: 'HI Gamepad', price: 550 },
+  }
   const cartRows = Object.entries(items).map(([id, quantity]) => ({
     product: products.find((item) => item.id === id),
+    display: cartDisplay[id],
     quantity,
   })).filter((row) => row.product)
-  const subtotal = cartRows.reduce((sum, row) => sum + row.product.price * row.quantity, 0)
+  const subtotal = cartRows.reduce((sum, row) => sum + (row.display?.price || row.product.price) * row.quantity, 0)
 
   return (
-    <main className="page-shell inner-page">
+    <main className="page-shell inner-page cart-page">
       <p className="breadcrumb">Home / <strong>Cart</strong></p>
       <div className="cart-table">
         <div className="cart-head"><span>Product</span><span>Price</span><span>Quantity</span><span>Subtotal</span></div>
-        {cartRows.map(({ product, quantity }) => (
+        {cartRows.map(({ product, display, quantity }) => {
+          const rowPrice = display?.price || product.price
+          return (
           <div className="cart-row" key={product.id}>
-            <span><img src={product.image} alt="" />{product.name}</span>
-            <span>{money(product.price)}</span>
-            <input type="number" min="1" value={quantity} onChange={(event) => dispatch(updateQuantity({ id: product.id, quantity: Number(event.target.value) }))} />
-            <span>{money(product.price * quantity)} <button type="button" onClick={() => dispatch(removeFromCart(product.id))}><Trash2 size={16} /></button></span>
+            <span className="cart-product">
+              <span className="cart-thumb">
+                <img src={display?.image || product.image} alt="" />
+                <button type="button" onClick={() => dispatch(removeFromCart(product.id))} aria-label={`Remove ${display?.name || product.name}`}>
+                  <X size={12} />
+                </button>
+              </span>
+              {display?.name || product.name}
+            </span>
+            <span>{money(rowPrice)}</span>
+            <select className="cart-quantity" value={quantity} onChange={(event) => dispatch(updateQuantity({ id: product.id, quantity: Number(event.target.value) }))}>
+              {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => (
+                <option key={value} value={value}>{String(value).padStart(2, '0')}</option>
+              ))}
+            </select>
+            <span>{money(rowPrice * quantity)}</span>
           </div>
-        ))}
+          )
+        })}
       </div>
       <div className="cart-actions"><Link to="/">Return To Shop</Link><button type="button">Update Cart</button></div>
       <div className="cart-bottom">
         <div className="coupon"><input placeholder="Coupon Code" /><button type="button">Apply Coupon</button></div>
-        <div className="cart-total"><h2>Cart Total</h2><p><span>Subtotal:</span>{money(subtotal)}</p><p><span>Shipping:</span>Free</p><p><span>Total:</span>{money(subtotal)}</p><button type="button">Procees to checkout</button></div>
+        <div className="cart-total"><h2>Cart Total</h2><p><span>Subtotal:</span>{money(subtotal)}</p><p><span>Shipping:</span>Free</p><p><span>Total:</span>{money(subtotal)}</p><button type="button">Process to checkout</button></div>
       </div>
     </main>
   )
