@@ -1,4 +1,7 @@
 import {
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
   Camera,
   ChevronDown,
   CircleUserRound,
@@ -18,6 +21,7 @@ import {
   UserRound,
   Watch,
 } from 'lucide-react'
+import { useState } from 'react'
 import { Link, NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import Toggle from './components/Toggle'
@@ -28,13 +32,13 @@ import { useForm } from './hooks/useForm'
 import { addToCart, removeFromCart, updateQuantity } from './store/cartSlice'
 
 const categories = [
-  'Woman’s Fashion',
-  'Men’s Fashion',
+  "Woman's Fashion",
+  "Men's Fashion",
   'Electronics',
   'Home & Lifestyle',
   'Medicine',
   'Sports & Outdoor',
-  'Baby’s & Toys',
+  "Baby's & Toys",
   'Groceries & Pets',
   'Health & Beauty',
 ]
@@ -123,7 +127,7 @@ function AccountDropdown() {
 function Footer() {
   return (
     <footer>
-      <div>
+      <div className="footer-col">
         <h3>Exclusive</h3>
         <h4>Subscribe</h4>
         <p>Get 10% off your first order</p>
@@ -132,46 +136,76 @@ function Footer() {
           <span>→</span>
         </label>
       </div>
-      <div>
+      <div className="footer-col">
         <h4>Support</h4>
         <p>111 Bijoy sarani, Dhaka, DH 1515, Bangladesh.</p>
         <p>exclusive@gmail.com</p>
         <p>+88015-88888-9999</p>
       </div>
-      <div>
+      <div className="footer-col">
         <h4>Account</h4>
         <Link to="/account">My Account</Link>
         <Link to="/login">Login / Register</Link>
         <Link to="/cart">Cart</Link>
         <Link to="/wishlist">Wishlist</Link>
       </div>
-      <div>
+      <div className="footer-col">
         <h4>Quick Link</h4>
         <a>Privacy Policy</a>
         <a>Terms Of Use</a>
         <a>FAQ</a>
         <a>Contact</a>
       </div>
-      <div>
+      <div className="footer-col">
         <h4>Download App</h4>
         <p>Save $3 with App New User Only</p>
-        <div className="store-buttons">
-          <span>Google Play</span>
-          <span>App Store</span>
+        <div className="download-app">
+          <img className="qr-code" src="/assets/qr-code.png" alt="Exclusive app QR code" />
+          <div className="store-buttons">
+            <img src="/assets/google-play.svg" alt="Get it on Google Play" />
+            <img src="/assets/app-store.svg" alt="Download on the App Store" />
+          </div>
+        </div>
+        <div className="social-links" aria-label="Social links">
+          <a aria-label="Facebook"><span className="brand-icon facebook-mark">f</span></a>
+          <a aria-label="Twitter"><span className="brand-icon twitter-mark">x</span></a>
+          <a aria-label="Instagram">
+            <svg className="brand-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="4" y="4" width="16" height="16" rx="5" />
+              <circle cx="12" cy="12" r="3.5" />
+              <circle cx="16.8" cy="7.2" r="1" />
+            </svg>
+          </a>
+          <a aria-label="LinkedIn"><span className="brand-icon linkedin-mark">in</span></a>
         </div>
       </div>
+      <div className="footer-copy">© Copyright Rimel 2022. All right reserved</div>
     </footer>
   )
 }
 
-function SectionTitle({ eyebrow, title, action }) {
+function SectionTitle({ eyebrow, title, action, controls = true, onPrev, onNext }) {
   return (
     <div className="section-heading">
-      <div>
+      <div className="heading-copy">
         <p><span />{eyebrow}</p>
-        <h2>{title}</h2>
+        <div className="title-line">
+          <h2>{title}</h2>
+          {controls && action}
+        </div>
       </div>
-      {action}
+      <div className="section-actions">
+        {controls ? <ArrowControls onPrev={onPrev} onNext={onNext} /> : action}
+      </div>
+    </div>
+  )
+}
+
+function ArrowControls({ onPrev, onNext }) {
+  return (
+    <div className="arrow-controls">
+      <button type="button" onClick={onPrev} aria-label="Previous items"><ArrowLeft size={20} /></button>
+      <button type="button" onClick={onNext} aria-label="Next items"><ArrowRight size={20} /></button>
     </div>
   )
 }
@@ -193,6 +227,7 @@ function ProductCard({ product, removable = false }) {
     <article className="product-card">
       <div className="product-media">
         {product.discount && <span className="discount">{product.discount}</span>}
+        {product.badge && <span className="new-badge">{product.badge}</span>}
         <Toggle
           render={(liked, toggle) => (
             <button className="heart-button" type="button" onClick={toggle} aria-label="Toggle wishlist">
@@ -220,6 +255,42 @@ function ProductCard({ product, removable = false }) {
   )
 }
 
+function ProductCarousel({ items }) {
+  const [start, setStart] = useState(0)
+  const visibleCount = 5
+  const visibleItems = Array.from({ length: Math.min(visibleCount, items.length) }, (_, index) => {
+    return items[(start + index) % items.length]
+  })
+
+  const goPrev = () => setStart((current) => (current - 1 + items.length) % items.length)
+  const goNext = () => setStart((current) => (current + 1) % items.length)
+
+  return (
+    <>
+      <SectionTitle
+        eyebrow="Today's"
+        title="Flash Sales"
+        onPrev={goPrev}
+        onNext={goNext}
+        action={
+          <div className="timer">
+            <span><small>Days</small>03</span>
+            <b>:</b>
+            <span><small>Hours</small>23</span>
+            <b>:</b>
+            <span><small>Minutes</small>19</span>
+            <b>:</b>
+            <span><small>Seconds</small>56</span>
+          </div>
+        }
+      />
+      <div className="product-strip">
+        {visibleItems.map((product) => <ProductCard key={`${product.id}-${start}`} product={product} />)}
+      </div>
+    </>
+  )
+}
+
 function Home() {
   return (
     <main>
@@ -231,29 +302,23 @@ function Home() {
         </aside>
         <div className="hero-banner">
           <div>
-            <p className="apple-line"> iPhone 14 Series</p>
+            <p className="apple-line">Apple iPhone 14 Series</p>
             <h1>Up to 10% off Voucher</h1>
             <a href="#products">Shop Now →</a>
           </div>
-          <img src="/assets/iphone.png" alt="iPhone 14 Series" />
+          <img src="/assets/iphone-hero.png" alt="iPhone 14 Series" />
+          <div className="hero-dots"><span /><span /><span className="active" /><span /><span /></div>
         </div>
       </section>
-      <section className="page-shell block" id="products">
-        <SectionTitle
-          eyebrow="Today’s"
-          title="Flash Sales"
-          action={<div className="timer"><span>03</span><span>23</span><span>19</span><span>56</span></div>}
-        />
-        <div className="product-grid">
-          {products.slice(0, 4).map((product) => <ProductCard key={product.id} product={product} />)}
-        </div>
+      <section className="page-shell block section-rule" id="products">
+        <ProductCarousel items={products.slice(0, 8)} />
         <div className="center"><Link className="primary-btn" to="/wishlist">View All Products</Link></div>
       </section>
-      <section className="page-shell block">
+      <section className="page-shell block section-rule">
         <SectionTitle eyebrow="Categories" title="Browse By Category" />
         <div className="category-grid">
           {categoryIcons.map(([Icon, label]) => (
-            <div className="category-tile" key={label}>
+            <div className={`category-tile ${label === 'Camera' ? 'active' : ''}`} key={label}>
               <Icon size={32} />
               <span>{label}</span>
             </div>
@@ -261,7 +326,7 @@ function Home() {
         </div>
       </section>
       <section className="page-shell block">
-        <SectionTitle eyebrow="This Month" title="Best Selling Products" action={<Link className="primary-btn small" to="/wishlist">View All</Link>} />
+        <SectionTitle eyebrow="This Month" title="Best Selling Products" controls={false} action={<Link className="primary-btn small" to="/wishlist">View All</Link>} />
         <div className="product-grid">
           {products.slice(4, 8).map((product) => <ProductCard key={product.id} product={product} />)}
         </div>
@@ -278,8 +343,11 @@ function Home() {
       <section className="page-shell block">
         <SectionTitle eyebrow="Our Products" title="Explore Our Products" />
         <div className="product-grid">
-          {products.slice(8, 12).map((product) => <ProductCard key={product.id} product={product} />)}
+          {[products[12], products[8], products[13], products[14], products[15], products[9], products[0], products[10]]
+            .filter(Boolean)
+            .map((product) => <ProductCard key={product.id} product={product} />)}
         </div>
+        <div className="center"><Link className="primary-btn" to="/wishlist">View All Products</Link></div>
       </section>
       <section className="page-shell block">
         <SectionTitle eyebrow="Featured" title="New Arrival" />
@@ -290,21 +358,25 @@ function Home() {
             <p>Black and White version of the PS5 coming out on sale.</p>
             <a>Shop Now</a>
           </div>
-          <div className="arrival-wide">
-            <img src="/assets/fashion.jpg" alt="Women’s Collections" />
-            <h3>Women’s Collections</h3>
-            <p>Featured woman collections that give you another vibe.</p>
-            <a>Shop Now</a>
-          </div>
-          <div>
-            <img src="/assets/speaker.jpg" alt="Speakers" />
-            <h3>Speakers</h3>
-            <p>Amazon wireless speakers</p>
-          </div>
-          <div>
-            <img src="/assets/perfume.jpg" alt="Perfume" />
-            <h3>Perfume</h3>
-            <p>GUCCI INTENSE OUD EDP</p>
+          <div className="arrival-side">
+            <div className="arrival-wide">
+              <img src="/assets/fashion.jpg" alt="Women's Collections" />
+              <h3>Women's Collections</h3>
+              <p>Featured woman collections that give you another vibe.</p>
+              <a>Shop Now</a>
+            </div>
+            <div className="arrival-mini-grid">
+              <div>
+                <img src="/assets/speaker.jpg" alt="Speakers" />
+                <h3>Speakers</h3>
+                <p>Amazon wireless speakers</p>
+              </div>
+              <div>
+                <img src="/assets/perfume.jpg" alt="Perfume" />
+                <h3>Perfume</h3>
+                <p>GUCCI INTENSE OUD EDP</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -315,11 +387,23 @@ function Home() {
 
 function Services() {
   return (
-    <section className="services page-shell">
-      <div><Truck size={34} /><h3>FREE AND FAST DELIVERY</h3><p>Free delivery for all orders over $140</p></div>
-      <div><Headphones size={34} /><h3>24/7 CUSTOMER SERVICE</h3><p>Friendly 24/7 customer support</p></div>
-      <div><ShieldCheck size={34} /><h3>MONEY BACK GUARANTEE</h3><p>We return money within 30 days</p></div>
-    </section>
+    <>
+      <section className="services page-shell">
+        <div><Truck size={34} /><h3>FREE AND FAST DELIVERY</h3><p>Free delivery for all orders over $140</p></div>
+        <div><Headphones size={34} /><h3>24/7 CUSTOMER SERVICE</h3><p>Friendly 24/7 customer support</p></div>
+        <div><ShieldCheck size={34} /><h3>MONEY BACK GUARANTEE</h3><p>We return money within 30 days</p></div>
+      </section>
+      <div className="back-to-top-wrap page-shell">
+        <button
+          className="back-to-top"
+          type="button"
+          aria-label="Back to top"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
+          <ArrowUp size={22} />
+        </button>
+      </div>
+    </>
   )
 }
 
