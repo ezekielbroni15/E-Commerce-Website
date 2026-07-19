@@ -15,6 +15,7 @@ import {
   PackageCheck,
   Plus,
   Search,
+  SendHorizontal,
   ShieldCheck,
   ShoppingBag,
   ShoppingCart,
@@ -59,6 +60,10 @@ const categoryIcons = [
 
 function money(value) {
   return `$${value}`
+}
+
+function imageClass(product) {
+  return `product-image product-image-${product.id}`
 }
 
 function Header() {
@@ -141,7 +146,7 @@ function Footer() {
         <p>Get 10% off your first order</p>
         <label className="footer-input">
           <input placeholder="Enter your email" />
-          <span>→</span>
+          <SendHorizontal size={20} />
         </label>
       </div>
       <div className="footer-col">
@@ -156,6 +161,7 @@ function Footer() {
         <Link to="/login">Login / Register</Link>
         <Link to="/cart">Cart</Link>
         <Link to="/wishlist">Wishlist</Link>
+        <Link to="/">Shop</Link>
       </div>
       <div className="footer-col">
         <h4>Quick Link</h4>
@@ -263,7 +269,7 @@ function ProductCard({ product, removable = false, viewOnly = false }) {
           </>
         )}
         <Link to={`/products/${product.id}`}>
-          <img src={product.image} alt={product.name} />
+          <img className={imageClass(product)} src={product.image} alt={product.name} />
         </Link>
         <button type="button" onClick={() => dispatch(addToCart(product.id))}>Add To Cart</button>
       </div>
@@ -526,9 +532,9 @@ function ProductDetails() {
       <p className="breadcrumb">Account / Gaming / <strong>{detailProduct.name}</strong></p>
       <section className="detail-layout">
         <div className="thumbs">
-          {[1, 2, 3, 4].map((item) => <div key={item}><img src={detailProduct.image} alt="" /></div>)}
+          {[1, 2, 3, 4].map((item) => <div key={item}><img className={imageClass(detailProduct)} src={detailProduct.image} alt="" /></div>)}
         </div>
-        <div className="detail-image"><img src={detailProduct.image} alt={detailProduct.name} /></div>
+        <div className="detail-image"><img className={imageClass(detailProduct)} src={detailProduct.image} alt={detailProduct.name} /></div>
         <div className="detail-info">
           <h1>{detailProduct.name}</h1>
           <div className="detail-rating"><Rating value={detailProduct.rating} reviews={detailProduct.reviews} /><span>|</span><strong>In Stock</strong></div>
